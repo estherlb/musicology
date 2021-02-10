@@ -5,26 +5,27 @@ date: "9-2-2021"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+```{r}
+library(tidyverse)
+library(spotifyr)
 ```
 
-## R Markdown ee
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
+```{r}
+disney <- get_playlist_audio_features("","37i9dQZF1DX8C9xQcOrE6T")
 ```
 
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r}
+s80 <- get_playlist_audio_features("", "23xQYspGsaIsztrKTHM8cN")
+s00 <- get_playlist_audio_features("", "6dv5FbNRVlQelteqnNDFTe")
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+```{r}
+digster <-
+  bind_rows(
+    s80 %>% mutate(category = "s80"),
+    s00 %>% mutate(category = "s00")
+  )
+digster %>% ggplot(aes(x = danceability)) + geom_histogram(binwidth = 0.1)
+
+```
+
