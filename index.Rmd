@@ -24,9 +24,21 @@ songs <-
     CM_soundtrack %>% mutate(category = "C. more soundtracks")
   )
 ```
+
 ```{r}
 songs %>%
   ggplot(aes(x = category, y = valence)) +
+  geom_boxplot()
+```
+
+```{r}
+songs %>%
+  ggplot(aes(x = category, y = tempo)) +
+  geom_boxplot()
+```
+```{r}
+songs %>%
+  ggplot(aes(x = category, y = danceability)) +
   geom_boxplot()
 ```
 ```{r}
@@ -34,6 +46,35 @@ songs %>%
   ggplot(aes(x = category, y = energy)) +
   geom_violin()
 ```
+
+
+
+```{r}
+ggplot(songs, aes(valence, danceability, colour = category, size = track.popularity)) + 
+  geom_point()
+```
+
+```{r}
+ggplot(songs, aes(energy, tempo, colour = category, size = track.popularity)) + 
+  geom_point()
+```
+
+```{r}
+my_songs_mean <- CM_faves %>%
+  summarise(
+    mean_tempo = mean(tempo)
+  )
+my_songs_mean
+```
+```{r}
+# Print which theme song is closest to mean tempo of my songs
+Themes_tempo <- CM_themes[,"tempo"]
+Values <- abs(Themes_tempo-c(my_songs_mean))
+Min_value = min(Values)
+Index <- which(Values==Min_value)
+CM_themes[Index, "track.name"]
+```
+
 
 
 
