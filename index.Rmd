@@ -11,21 +11,29 @@ library(spotifyr)
 ```
 
 ```{r}
-disney <- get_playlist_audio_features("","37i9dQZF1DX8C9xQcOrE6T")
+CM_themes <- get_playlist_audio_features("","6ubQSyY5AOAZOTLaBUFHWD")
+CM_soundtrack <- get_playlist_audio_features("","5Lo1O7pS5PWc9z6UuplHyX")
+CM_faves <- get_playlist_audio_features("","0QzlUG13KFnSFOqgxeEli2")
 ```
 
 ```{r}
-s80 <- get_playlist_audio_features("", "23xQYspGsaIsztrKTHM8cN")
-s00 <- get_playlist_audio_features("", "6dv5FbNRVlQelteqnNDFTe")
-```
-
-```{r}
-digster <-
+songs <-
   bind_rows(
-    s80 %>% mutate(category = "s80"),
-    s00 %>% mutate(category = "s00")
+    CM_themes %>% mutate(category = "B. Theme songs"),
+    CM_faves %>% mutate(category = "A. My songs"),
+    CM_soundtrack %>% mutate(category = "C. more soundtracks")
   )
-digster %>% ggplot(aes(x = danceability)) + geom_histogram(binwidth = 0.1)
-
 ```
+```{r}
+songs %>%
+  ggplot(aes(x = category, y = valence)) +
+  geom_boxplot()
+```
+```{r}
+songs %>%
+  ggplot(aes(x = category, y = energy)) +
+  geom_violin()
+```
+
+
 
