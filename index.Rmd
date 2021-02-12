@@ -8,6 +8,8 @@ output: html_document
 ```{r}
 library(tidyverse)
 library(spotifyr)
+library(ggthemes)
+library(ggrepel)
 ```
 
 ```{r}
@@ -24,45 +26,65 @@ songs <-
     CM_soundtrack %>% mutate(category = "C. more soundtracks")
   )
 ```
+```{r}
+movie_songs <-
+  bind_rows(
+    CM_themes %>% mutate(category = "B. Theme songs"),
+    CM_soundtrack %>% mutate(category = "C. more soundtracks")
+  )
+```
 
 ```{r}
 songs %>%
   ggplot(aes(x = category, y = valence)) +
-  geom_boxplot()
+  geom_boxplot() +
+  theme_wsj() +
+  labs(title = "Valence")
 ```
 
 ```{r}
 songs %>%
   ggplot(aes(x = category, y = tempo)) +
-  geom_boxplot()
+  geom_boxplot()+
+  theme_wsj()+
+  labs(title = "Tempo")+
+  geom_text_repel(data = subset(movie_songs, tempo > 200), aes(label = track.name), size=3)
 ```
 ```{r}
 songs %>%
   ggplot(aes(x = category, y = danceability)) +
-  geom_boxplot()
+  geom_boxplot()+
+  theme_wsj()+
+  labs(title = "Danceability")
 ```
 ```{r}
 songs %>%
   ggplot(aes(x = category, y = energy)) +
-  geom_violin()
+  geom_violin()+
+  theme_wsj()+
+  labs(title = "Energy")
 ```
 
 
 
 ```{r}
-ggplot(songs, aes(valence, danceability, colour = category, size = track.popularity)) + 
-  geom_point()
+ggplot(songs, aes(valence, danceability, colour = category, alpha = track.popularity)) + 
+  geom_point()+
+  theme_solarized()+
+  labs(title = "Dancebility vs. Valence")
 ```
 
 ```{r}
 ggplot(songs, aes(energy, tempo, colour = category, size = track.popularity)) + 
-  geom_point()
+  geom_point()+
+  theme_solarized()+
+  labs(title = "Tempo vs Energy")
 ```
 
 ```{r}
 my_songs_mean <- CM_faves %>%
   summarise(
-    mean_tempo = mean(tempo)
+    mean_tempo_my_songs = mean(tempo)
   )
 my_songs_mean
 ```
@@ -74,6 +96,7 @@ Min_value = min(Values)
 Index <- which(Values==Min_value)
 CM_themes[Index, "track.name"]
 ```
+
 
 
 
