@@ -12,6 +12,10 @@ library(ggthemes)
 library(ggrepel)
 ```
 
+# Introduction
+
+There are three playlists so far: Theme songs, soundtracks and my favorite songs. I'm going to look at some features. At first danceability and valence, after that tempo and energy.  
+
 ```{r}
 CM_themes <- get_playlist_audio_features("","6ubQSyY5AOAZOTLaBUFHWD")
 CM_soundtrack <- get_playlist_audio_features("","5Lo1O7pS5PWc9z6UuplHyX")
@@ -34,12 +38,27 @@ movie_songs <-
   )
 ```
 
+
+```{r}
+songs %>%
+  ggplot(aes(x = category, y = danceability)) +
+  geom_boxplot()+
+  theme_wsj()+
+  labs(title = "Danceability")
+```
+
 ```{r}
 songs %>%
   ggplot(aes(x = category, y = valence)) +
   geom_boxplot() +
   theme_wsj() +
   labs(title = "Valence")
+```
+```{r}
+ggplot(songs, aes(valence, danceability, colour = category, alpha = track.popularity)) + 
+  geom_point()+
+  theme_solarized()+
+  labs(title = "Dancebility vs. Valence")
 ```
 
 ```{r}
@@ -50,13 +69,7 @@ songs %>%
   labs(title = "Tempo")+
   geom_text_repel(data = subset(movie_songs, tempo > 200), aes(label = track.name), size=3)
 ```
-```{r}
-songs %>%
-  ggplot(aes(x = category, y = danceability)) +
-  geom_boxplot()+
-  theme_wsj()+
-  labs(title = "Danceability")
-```
+
 ```{r}
 songs %>%
   ggplot(aes(x = category, y = energy)) +
@@ -68,18 +81,44 @@ songs %>%
 
 
 ```{r}
-ggplot(songs, aes(valence, danceability, colour = category, alpha = track.popularity)) + 
-  geom_point()+
-  theme_solarized()+
-  labs(title = "Dancebility vs. Valence")
-```
-
-```{r}
 ggplot(songs, aes(energy, tempo, colour = category, size = track.popularity)) + 
   geom_point()+
   theme_solarized()+
-  labs(title = "Tempo vs Energy")
+  labs(title = "Tempo vs Energy", caption = "Tempo seems equally distributed for all the three playlists, unlike the other features.")
 ```
+## Music over the years
+
+```{r}
+# Dataframe
+df <- CM_themes %>%
+ select(track.album.release_date, energy, tempo) %>%
+ mutate(
+  year = as.Date(track.album.release_date, format="%Y"),
+)
+
+# summarize
+by_year <- df %>%
+    group_by(year) %>%
+    summarize(energy=mean(energy), tempo=mean(tempo))
+by_year
+
+# plot
+ggplot(by_year, aes(x=year, y=energy))+
+  geom_smooth()+
+  labs(title="Energy over the years", subtitle = "Theme songs", caption = "Energy seems to descend over the years.")+
+  theme_wsj()
+
+```
+
+```{r}
+ggplot(by_year, aes(x=year, y=tempo))+
+  geom_smooth()+
+  labs(title="Tempo over the years", subtitle = "Theme songs", caption = "Tempo has a steady mean.")+
+  theme_wsj()
+```
+
+## What theme song is like my music?
+Tempo doesn't seem to deviate a lot from my music. I want to know what theme song corresponds with the mean tempo of my favorite songs.
 
 ```{r}
 my_songs_mean <- CM_faves %>%
@@ -96,8 +135,5 @@ Min_value = min(Values)
 Index <- which(Values==Min_value)
 CM_themes[Index, "track.name"]
 ```
-
-
-
 
 
