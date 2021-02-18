@@ -1,8 +1,11 @@
 ---
 title: "Music and movies"
-author: "Esther Bakels"
-date: "9-2-2021"
-output: html_document
+author: "Esther"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    storyboard: true
+    theme: flatly
 ---
 
 ```{r}
@@ -10,11 +13,22 @@ library(tidyverse)
 library(spotifyr)
 library(ggthemes)
 library(ggrepel)
+library(compmus)
+library(flexdashboard)
 ```
 
-# Introduction
+Page 1
+=======================================
 
-There are three playlists so far: Theme songs, soundtracks and my favorite songs. I'm going to look at some features. At first danceability and valence, after that tempo and energy.  
+
+### week 6
+I updated my playlists. I divided the soundtracks in a playlist of popular theme songs and a playlist with other soundtracks. There are three playlists so far: Theme songs, soundtracks and my favorite songs. I'm going to look at some features. At first danceability and valence, after that tempo and energy.  
+
+### week 5
+For this course, I want to work with spotify's "Movie Soundtrack Best of" playlist. Like the title says, this playlist contains soundtrack from different movies. There are 205 songs in the playlist. Some songs group together to one movie, and some songs are the only ones that represent a movie in the playlist. That all the songs come from a movie, does not mean they sound the same. Most of the songs contain no vocal sounds, but some songs are atypical for the playlist and have a very loud voice. Some songs are very upbeat and sound very positive and some songs would have probably played during a sad scene in the movie. This playlist has a lot of different movies, but most of them are more or less the same genre. I will maybe in the future add some other soundtracks to make the playlist somewhat more diverse. I see a lot of adventure/fantasy feel good movies, to make a representative dataset it is important to have other genres as well. Also, there are some movie saga's, the playlist contains a lot of Harry Potter songs for example. For this course, I would like to compare the music that I like to the movie soundtrack playlist, and see what movie compares best to my music and if my music taste is the same as my movie taste. I would also like to find out if the same movie genres have the same kind of music.
+
+
+
 
 ```{r}
 CM_themes <- get_playlist_audio_features("","6ubQSyY5AOAZOTLaBUFHWD")
@@ -39,14 +53,25 @@ movie_songs <-
 ```
 
 
+Page 2 
+=====================================================
+
+Column 1
+--------------------------------------
+### Dance
 ```{r}
 songs %>%
   ggplot(aes(x = category, y = danceability)) +
   geom_boxplot()+
   theme_wsj()+
   labs(title = "Danceability")
+
 ```
 
+> The danceability seems lower for soundtracks. Songs from movie are (most of the time) not made for dancing. 
+
+
+### Valence
 ```{r}
 songs %>%
   ggplot(aes(x = category, y = valence)) +
@@ -54,13 +79,14 @@ songs %>%
   theme_wsj() +
   labs(title = "Valence")
 ```
-```{r}
-ggplot(songs, aes(valence, danceability, colour = category, alpha = track.popularity)) + 
-  geom_point()+
-  theme_solarized()+
-  labs(title = "Dancebility vs. Valence")
-```
 
+> Songs from movies have a significant lower median than my songs.
+
+
+Column 2
+--------------------------------------------------
+
+### Temp
 ```{r}
 songs %>%
   ggplot(aes(x = category, y = tempo)) +
@@ -70,6 +96,10 @@ songs %>%
   geom_text_repel(data = subset(movie_songs, tempo > 200), aes(label = track.name), size=3)
 ```
 
+> The median of the tempo is appromiximately the same.
+
+### energy violin
+
 ```{r}
 songs %>%
   ggplot(aes(x = category, y = energy)) +
@@ -78,17 +108,26 @@ songs %>%
   labs(title = "Energy")
 ```
 
+> Songs from movies have a lower energy than my songs. Soundtracks aree intended as background music, so a song full energy could distract the watcher from the movie, so these results make sense. 
 
+Page 3
+====================================================
 
 ```{r}
 ggplot(songs, aes(energy, tempo, colour = category, size = track.popularity)) + 
   geom_point()+
   theme_solarized()+
-  labs(title = "Tempo vs Energy", caption = "Tempo seems equally distributed for all the three playlists, unlike the other features.")
+  labs(title = "Tempo vs Energy")
 ```
-## Music over the years
 
-```{r}
+> Tempo seems equally distributed for all the three playlists, unlike the other features.
+
+Page 4
+=============================================
+
+## ENergy
+-----------------------------------------
+```{r, results='hide'}
 # Dataframe
 df <- CM_themes %>%
  select(track.album.release_date, energy, tempo) %>%
@@ -101,23 +140,39 @@ by_year <- df %>%
     group_by(year) %>%
     summarize(energy=mean(energy), tempo=mean(tempo))
 by_year
+```
 
+
+```{r}
 # plot
+
 ggplot(by_year, aes(x=year, y=energy))+
   geom_smooth()+
-  labs(title="Energy over the years", subtitle = "Theme songs", caption = "Energy seems to descend over the years.")+
+  labs(title="Energy over the years", subtitle = "Theme songs")+
   theme_wsj()
 
 ```
 
+> Energy seems to descend over until 2000 and then goes up again.
+
+
+## Tempo
+--------------------------------------
 ```{r}
 ggplot(by_year, aes(x=year, y=tempo))+
   geom_smooth()+
-  labs(title="Tempo over the years", subtitle = "Theme songs", caption = "Tempo has a steady mean.")+
+  labs(title="Tempo over the years", subtitle = "Theme songs")+
   theme_wsj()
 ```
 
+> Tempo has a steady mean.
+
+
+Page 5
+===============================================================
+
 ## What theme song is like my music?
+-----------------------------------------------------------------------
 Tempo doesn't seem to deviate a lot from my music. I want to know what theme song corresponds with the mean tempo of my favorite songs.
 
 ```{r}
@@ -136,4 +191,31 @@ Index <- which(Values==Min_value)
 CM_themes[Index, "track.name"]
 ```
 
+
+## chromagram
+-------------------------------------------------------
+
+```{r}
+alice_theme <-
+  get_tidy_audio_analysis("5yJ4g5wiv77VzuhidvAnJ6") %>%
+  select(segments) %>%
+  unnest(segments) %>%
+  select(start, duration, pitches)
+
+alice_theme %>%
+  mutate(pitches = map(pitches, compmus_normalise, "manhattan")) %>%
+  compmus_gather_chroma() %>% 
+  ggplot(
+    aes(
+      x = start + duration / 2,
+      width = duration,
+      y = pitch_class,
+      fill = value
+    )
+  ) +
+  geom_tile() +
+  labs(x = "Time (s)", y = NULL, fill = "Magnitude") +
+  theme_minimal() +
+  scale_fill_viridis_c()
+```
 
