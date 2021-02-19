@@ -5,8 +5,7 @@ output:
   flexdashboard::flex_dashboard:
     orientation: columns
     storyboard: true
-    theme: default
-    vertical_layout: fill
+    theme: flatly
 ---
 
 ```{r}
@@ -23,7 +22,9 @@ library(plotly)
 ### Introduction
 
 
-### Visualisation energy
+### Visualisation per feature. (Tempo, Energy)
+
+#### Tempo boxplot
 
 ```{r}
 CM_themes <- get_playlist_audio_features("","6ubQSyY5AOAZOTLaBUFHWD")
@@ -45,7 +46,7 @@ movie_songs <-
     CM_soundtrack %>% mutate(category = "C. more soundtracks")
   )
 ```
-```{r, fig.show='hide'}
+```{r}
 songs %>%
   ggplot(aes(x = category, y = tempo)) +
   geom_boxplot()+
@@ -53,20 +54,21 @@ songs %>%
   labs(title = "Tempo")+
   geom_text_repel(data = subset(movie_songs, tempo > 200), aes(label = track.name), size=3)
 ```
+
+#### Energy boxplot
+
 ```{r}
 songs %>%
   ggplot(aes(x = category, y = energy)) +
   geom_boxplot()+
   theme_wsj()+
-  labs(title = "Energy")
+  labs(title = "Energy")+
+  geom_text_repel(data = subset(movie_songs, tempo > 200), aes(label = track.name), size=3)
+
 ```
 
---- 
 
-
-Songs from movies have a lower energy than my songs. Soundtracks aree intended as background music, so a song full energy could distract the watcher from the movie, so these results make sense. 
-
-### Visualisation tempo
+#### Energy over years
 
 ```{r, results='hide'}
 # Dataframe
@@ -82,7 +84,7 @@ by_year <- df %>%
     summarize(energy=mean(energy), tempo=median(tempo))
 by_year
 ```
-```{r , fig.show='hide'}
+```{r }
 # plot
 
 ggplot(by_year, aes(x=year, y=energy))+
@@ -91,6 +93,9 @@ ggplot(by_year, aes(x=year, y=energy))+
   theme_wsj()
 
 ```
+
+#### Tempo over years
+
 ```{r}
 ggplot(by_year, aes(x=year, y=tempo))+
   geom_smooth()+
@@ -101,7 +106,7 @@ ggplot(by_year, aes(x=year, y=tempo))+
 
 
 
-### Visualisation tempo and energy
+### Visualisation Tempo and Energy together.
 
 ```{r}
 vs <- ggplot(songs, aes(energy, tempo, colour = category, size = track.popularity)) + 
@@ -114,7 +119,7 @@ ggplotly(vs)
 
 ---
 
-Tempo seems equally distributed for all the three playlists, unlike the other features.
+If you click on B and C, only A will show. You'll see that a red cluster is formed in the right side of the plot. B and C together are more active on the right side.You don't see clusters forming in the up or down side.Tempo seems equally distributed for all the three playlists, unlike the other feature energy.
 
 
 
