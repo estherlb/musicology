@@ -17,6 +17,7 @@ library(ggrepel)
 library(compmus)
 library(flexdashboard)
 library(shiny)
+library(plotly)
 ```
 
 ### Introduction
@@ -103,11 +104,12 @@ ggplot(by_year, aes(x=year, y=tempo))+
 ### Visualisation tempo and energy
 
 ```{r}
-ggplot(songs, aes(energy, tempo, colour = category, size = track.popularity)) + 
+vs <- ggplot(songs, aes(energy, tempo, colour = category, size = track.popularity)) + 
   geom_point()+
   theme_solarized()+
   labs(title = "Tempo vs Energy")
 
+ggplotly(vs)
 ```
 
 ---
@@ -153,7 +155,11 @@ my_songs_mean <- CM_faves %>%
   summarise(
     mean_tempo_my_songs = mean(tempo)
   )
+
+valueBox(my_songs_mean, color="primary", caption = "Mean")
 ```
+
+
 ```{r}
 # Print which theme song is closest to mean tempo of my songs
 Themes_tempo <- CM_themes[,"tempo"]
