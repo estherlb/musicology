@@ -24,6 +24,8 @@ library(plotly)
 
 ### Visualisation per feature. (Tempo, Energy)
 
+##### BOXPLOTS {.tabset}
+
 #### Tempo boxplot
 
 ```{r}
@@ -68,7 +70,10 @@ songs %>%
 ```
 
 
-#### Energy over years
+##### YEARS {.tabset}
+
+
+#### Tempo over years
 
 ```{r, results='hide'}
 # Dataframe
@@ -84,6 +89,17 @@ by_year <- df %>%
     summarize(energy=mean(energy), tempo=median(tempo))
 by_year
 ```
+
+
+```{r}
+ggplot(by_year, aes(x=year, y=tempo))+
+  geom_smooth()+
+  labs(title="Tempo over the years", subtitle = "Theme songs")+
+  theme_wsj()
+```
+
+#### Energy over years
+
 ```{r }
 # plot
 
@@ -94,14 +110,6 @@ ggplot(by_year, aes(x=year, y=energy))+
 
 ```
 
-#### Tempo over years
-
-```{r}
-ggplot(by_year, aes(x=year, y=tempo))+
-  geom_smooth()+
-  labs(title="Tempo over the years", subtitle = "Theme songs")+
-  theme_wsj()
-```
 
 
 
