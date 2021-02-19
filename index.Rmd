@@ -45,7 +45,7 @@ movie_songs <-
     CM_soundtrack %>% mutate(category = "C. more soundtracks")
   )
 ```
-```{r, results='hide'}
+```{r, fig.show='hide'}
 songs %>%
   ggplot(aes(x = category, y = tempo)) +
   geom_boxplot()+
