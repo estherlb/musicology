@@ -17,6 +17,7 @@ library(compmus)
 library(flexdashboard)
 library(shiny)
 library(plotly)
+library(knitr)
 ```
 
 
@@ -43,7 +44,7 @@ My goal is to examine different features, compare them to one another and search
 
 ### How did these features change over the years? Visualisation per feature.
 
-##### BOXPLOTS
+##### BOXPLOTS AND GRAPHS
 
 ```{r}
 CM_themes <- get_playlist_audio_features("","6ubQSyY5AOAZOTLaBUFHWD")
@@ -93,7 +94,6 @@ songs %>%
 
 Boxplot 2: The median of the different catogories is somewhat the same for theme songs and more soundtracks, but way higher for my songs. The median of category A is higher than B, this is maybe because theme songs are the main song of the movie. Category B also includes songs that are used as more background music in movies. The outlier "The Portrait" from boxplot 1 is this time one of the lowest few. 
 
-##### YEARS
 
 
 ```{r, results='hide'}
@@ -147,7 +147,7 @@ Graph 2: The median is plotted over the years. In boxplot 2, category A, we saw 
 vs <- ggplot(songs, aes(energy, tempo, colour = category, size = track.popularity)) + 
   geom_point()+
   theme_solarized()+
-  labs(title = "Tempo vs Energy")
+  labs(title = "Tempo vs. Energy")
 
 ggplotly(vs)
 ```
@@ -190,7 +190,7 @@ alice_theme %>%
 
 ---
 
-###### Conclusion:
+##### RESULTS:
 ```{r}
 my_songs_mean <- CM_faves %>%
   summarise(
@@ -208,10 +208,11 @@ Themes_tempo <- CM_themes[,"tempo"]
 Values <- abs(Themes_tempo-c(my_songs_mean))
 Min_value = min(Values)
 Index <- which(Values==Min_value)
- CM_themes[Index, "track.name"]
+endsong <- CM_themes[Index, "track.name"]
+
+kable(endsong)
 
 ```
 
 
-
-![](Cheshire_head.png)
+<img width="100%" src="Cheshire_head.png">
