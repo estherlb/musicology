@@ -183,8 +183,8 @@ alice_theme %>%
     )
   ) +
   geom_tile() +
-  labs(x = "Time (s)", y = NULL, fill = "Magnitude") +
-  theme_minimal() +
+  labs(x = "Time (s)", y = NULL, fill = "Magnitude", title="Chromagram Alice's Theme") +
+  theme_solarized() +
   scale_fill_viridis_c()
 ```
 
