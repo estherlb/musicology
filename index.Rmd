@@ -21,12 +21,18 @@ library(plotly)
 
 ### Introduction
 
+Almost every movie has music in it. These soundtracks often play in the background of a movie, so you would expect the music is calmer than music you'd listen to. On the other hand, maybe there are some features in the music that are not so different from your own music. I made three playlists:
 
-### Visualisation per feature. (Tempo, Energy)
+* A playlist with different theme songs, you could say these songs are the most important to a movie.
+* A playlist with more soundtracks, other than a themesong, movies have a lot of other music in it. 
+* An old playlist of mine where I stored my favorite songs over the last couple of years. 
 
-##### BOXPLOTS {.tabset}
+My goal is to examine different features, compare them to one another and search for a feature that isn't that different from my music. When I find that feature, I hope to find the themesong that corresponds the most to my favorite songs.
 
-#### Tempo boxplot
+
+### How did these features change over the years? Visualisation per feature.
+
+##### BOXPLOTS
 
 ```{r}
 CM_themes <- get_playlist_audio_features("","6ubQSyY5AOAZOTLaBUFHWD")
@@ -36,16 +42,16 @@ CM_faves <- get_playlist_audio_features("","0QzlUG13KFnSFOqgxeEli2")
 ```{r}
 songs <-
   bind_rows(
-    CM_themes %>% mutate(category = "B. Theme songs"),
-    CM_faves %>% mutate(category = "A. My songs"),
-    CM_soundtrack %>% mutate(category = "C. more soundtracks")
+    CM_themes %>% mutate(category = "A. Theme songs"),
+    CM_faves %>% mutate(category = "C. My songs"),
+    CM_soundtrack %>% mutate(category = "B. more soundtracks")
   )
 ```
 ```{r}
 movie_songs <-
   bind_rows(
-    CM_themes %>% mutate(category = "B. Theme songs"),
-    CM_soundtrack %>% mutate(category = "C. more soundtracks")
+    CM_themes %>% mutate(category = "A. Theme songs"),
+    CM_soundtrack %>% mutate(category = "B. more soundtracks")
   )
 ```
 ```{r}
@@ -54,10 +60,13 @@ songs %>%
   geom_boxplot()+
   theme_wsj()+
   labs(title = "Tempo")+
-  geom_text_repel(data = subset(movie_songs, tempo > 200), aes(label = track.name), size=3)
+  geom_text_repel(data = subset(movie_songs,tempo > 200), aes(label = track.name), size=3)
+
 ```
 
-#### Energy boxplot
+---
+
+Boxplot 1: The median of the different catogories is somewhat the same. The 50% around the median is differs more in category C, my songs. Catogory B has the lowest median, but an outlier with the highest tempo of all categories (The Portrait - James Horner).
 
 ```{r}
 songs %>%
@@ -69,11 +78,12 @@ songs %>%
 
 ```
 
+---
 
-##### YEARS {.tabset}
+Boxplot 2: The median of the different catogories is somewhat the same for theme songs and more soundtracks, but way higher for my songs. The median of category A is higher than B, this is maybe because theme songs are the main song of the movie. Category B also includes songs that are used as more background music in movies. The outlier "The Portrait" from boxplot 1 is this time one of the lowest few. 
 
+##### YEARS
 
-#### Tempo over years
 
 ```{r, results='hide'}
 # Dataframe
@@ -86,19 +96,23 @@ df <- CM_themes %>%
 # summarize
 by_year <- df %>%
     group_by(year) %>%
-    summarize(energy=mean(energy), tempo=median(tempo))
+    summarize(energy=median(energy), tempo=median(tempo))
 by_year
 ```
+
 
 
 ```{r}
 ggplot(by_year, aes(x=year, y=tempo))+
   geom_smooth()+
   labs(title="Tempo over the years", subtitle = "Theme songs")+
+  ylim(c(50,200))+
   theme_wsj()
 ```
 
-#### Energy over years
+---
+
+Graph 1: The median of tempo is plotted over the years. In boxplot 1, category A, we saw that the 50% around the median was small. In this graph, we can see that the 50% is so small because the tempo did not really change over the years. 
 
 ```{r }
 # plot
@@ -110,11 +124,13 @@ ggplot(by_year, aes(x=year, y=energy))+
 
 ```
 
+---
+
+Graph 2: The median is plotted over the years. In boxplot 2, category A, we saw that the 50% around the median was a lot bigger than boxplot 1. In this graph, we can see that the 50% is so big because the tempo did really change over the years. In the early stages, energy was at its highest point, but decreased rapidly. but around the 2000, energy has a turning point, and started to increase again.
 
 
 
-
-### Visualisation Tempo and Energy together.
+### How popular were these songs anyway? Visualisation Tempo and Energy together.
 
 ```{r}
 vs <- ggplot(songs, aes(energy, tempo, colour = category, size = track.popularity)) + 
@@ -127,7 +143,7 @@ ggplotly(vs)
 
 ---
 
-If you click on B and C, only A will show. You'll see that a red cluster is formed in the right side of the plot. B and C together are more active on the right side.You don't see clusters forming in the up or down side.Tempo seems equally distributed for all the three playlists, unlike the other feature energy.
+If you click on A and B, only C will show. You'll see that a red cluster is formed in the right side of the plot. A and B together are more active on the left side.You don't see clusters forming in the up or down side. Tempo seems equally distributed for all the three playlists, unlike the other feature energy. We also saw this in the visualisation per feature. 
 
 
 
@@ -169,9 +185,10 @@ my_songs_mean <- CM_faves %>%
     mean_tempo_my_songs = mean(tempo)
   )
 
-valueBox(my_songs_mean, color="primary", caption = "Mean")
 ```
 
+The mean tempo of my favorite songs is: `r my_songs_mean`. 
+The corresponding track by this song is:
 
 ```{r}
 # Print which theme song is closest to mean tempo of my songs
@@ -183,4 +200,6 @@ Index <- which(Values==Min_value)
 
 ```
 
-Tempo doesn't seem to deviate a lot from my music. I want to know what theme song corresponds with the mean tempo of my favorite songs.
+
+
+![Alice in Wonderland](Cheshire_head.png)
