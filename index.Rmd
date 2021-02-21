@@ -1,6 +1,6 @@
 ---
-title: "Music and movies"
-author: "Esther"
+title: "  Music and Movies | Computational Musicology 2021"
+author: "Esther L. Bakels <img src=\"logo.png\" style=\"float: left;\" width=\"35;\"/>"
 output: 
   flexdashboard::flex_dashboard:
     orientation: columns
@@ -19,7 +19,15 @@ library(shiny)
 library(plotly)
 ```
 
+
+
+
 ### Introduction
+
+
+#### Music and Movies
+
+<img align="right" src="musicmovie.jpg">
 
 Almost every movie has music in it. These soundtracks often play in the background of a movie, so you would expect the music is calmer than music you'd listen to. On the other hand, maybe there are some features in the music that are not so different from your own music. I made three playlists:
 
@@ -28,6 +36,9 @@ Almost every movie has music in it. These soundtracks often play in the backgrou
 * An old playlist of mine where I stored my favorite songs over the last couple of years. 
 
 My goal is to examine different features, compare them to one another and search for a feature that isn't that different from my music. When I find that feature, I hope to find the themesong that corresponds the most to my favorite songs.
+
+
+
 
 
 ### How did these features change over the years? Visualisation per feature.
@@ -143,13 +154,14 @@ ggplotly(vs)
 
 ---
 
+###### Graph 3:
 If you click on A and B, only C will show. You'll see that a red cluster is formed in the right side of the plot. A and B together are more active on the left side.You don't see clusters forming in the up or down side. Tempo seems equally distributed for all the three playlists, unlike the other feature energy. We also saw this in the visualisation per feature. 
 
 
 
 
 
-### Conclusion
+### What movie should I watch? Conclusion.
 
 
 ```{r}
@@ -178,7 +190,7 @@ alice_theme %>%
 
 ---
 
-
+###### Conclusion:
 ```{r}
 my_songs_mean <- CM_faves %>%
   summarise(
@@ -202,4 +214,4 @@ Index <- which(Values==Min_value)
 
 
 
-![Alice in Wonderland](Cheshire_head.png)
+![](Cheshire_head.png)
