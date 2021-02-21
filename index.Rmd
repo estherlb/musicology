@@ -80,6 +80,8 @@ songs %>%
 
 Boxplot 1: The median of the different catogories is somewhat the same. The 50% around the median is differs more in category C, my songs. Catogory B has the lowest median, but an outlier with the highest tempo of all categories (The Portrait - James Horner).
 
+---
+
 ```{r}
 songs %>%
   ggplot(aes(x = category, y = energy)) +
@@ -93,6 +95,8 @@ songs %>%
 ---
 
 Boxplot 2: The median of the different catogories is somewhat the same for theme songs and more soundtracks, but way higher for my songs. The median of category A is higher than B, this is maybe because theme songs are the main song of the movie. Category B also includes songs that are used as more background music in movies. The outlier "The Portrait" from boxplot 1 is this time one of the lowest few. 
+
+---
 
 
 
@@ -124,6 +128,9 @@ ggplot(by_year, aes(x=year, y=tempo))+
 ---
 
 Graph 1: The median of tempo is plotted over the years. In boxplot 1, category A, we saw that the 50% around the median was small. In this graph, we can see that the 50% is so small because the tempo did not really change over the years. 
+
+---
+
 
 ```{r }
 # plot
