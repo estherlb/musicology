@@ -20,6 +20,148 @@ library(plotly)
 library(knitr)
 ```
 
+Homework {.storyboard}
+============================
+
+### Alice in Wonderland cepstrogram
+
+```{r}
+bzt <-
+  get_tidy_audio_analysis("11liAe3FvMGspJ9x3a1xw4") %>% # Change URI.
+  compmus_align(bars, segments) %>%                     # Change `bars`
+  select(bars) %>%                                      #   in all three
+  unnest(bars) %>%                                      #   of these lines.
+  mutate(
+    pitches =
+      map(segments,
+        compmus_summarise, pitches,
+        method = "rms", norm = "euclidean"              # Change summary & norm.
+      )
+  ) %>%
+  mutate(
+    timbre =
+      map(segments,
+        compmus_summarise, timbre,
+        method = "rms", norm = "euclidean"              # Change summary & norm.
+      )
+  )
+```
+```{r}
+bzt %>%
+  compmus_gather_timbre() %>%
+  ggplot(
+    aes(
+      x = start + duration / 2,
+      width = duration,
+      y = basis,
+      fill = value
+    )
+  ) +
+  geom_tile() +
+  labs(x = "Time (s)", y = NULL, fill = "Magnitude", title="Alice's Theme" ) +
+  scale_fill_viridis_c() +                              
+  theme_classic()
+```
+
+--- 
+
+As shown in the conclusion, Alice's Theme is a song that is similar to my favorite songs when you look at tempo.\ bars - rms - euclidian
+
+### Alice in Wonderland self similarity matrix
+
+```{r}
+bzt %>%
+  compmus_self_similarity(timbre, "cosine") %>% 
+  ggplot(
+    aes(
+      x = xstart + xduration / 2,
+      width = xduration,
+      y = ystart + yduration / 2,
+      height = yduration,
+      fill = d
+    )
+  ) +
+  geom_tile() +
+  coord_fixed() +
+  scale_fill_viridis_c(guide = "none") +
+  theme_classic() +
+  labs(x = "", y = "", title="Alice's Theme")
+```
+
+---
+ 
+Chessboard pattern
+
+### Titanic cepstrogram
+```{r}
+bzt2 <-
+  get_tidy_audio_analysis("0yIM3MDx8UTwueyoZJobsb") %>% # Change URI.
+  compmus_align(sections, segments) %>%                     # Change `bars`
+  select(sections) %>%                                      #   in all three
+  unnest(sections) %>%                                      #   of these lines.
+  mutate(
+    pitches =
+      map(segments,
+        compmus_summarise, pitches,
+        method = "rms", norm = "euclidean"              # Change summary & norm.
+      )
+  ) %>%
+  mutate(
+    timbre =
+      map(segments,
+        compmus_summarise, timbre,
+        method = "rms", norm = "euclidean"              # Change summary & norm.
+      )
+  )
+```
+```{r}
+bzt2 %>%
+  compmus_gather_timbre() %>%
+  ggplot(
+    aes(
+      x = start + duration / 2,
+      width = duration,
+      y = basis,
+      fill = value
+    )
+  ) +
+  geom_tile() +
+  labs(x = "Time (s)", y = NULL, fill = "Magnitude", title="The portrait" ) +
+  scale_fill_viridis_c() +                              
+  theme_classic()
+
+```
+
+---
+
+As shown in the visualisation boxplots, the portrait is an outlier in my corpus when you look at tempo in the Theme Song playlist. section - rms - euclidian
+
+### Titanic self similarity matrix
+
+```{r}
+bzt2 %>%
+  compmus_self_similarity(timbre, "cosine") %>% 
+  ggplot(
+    aes(
+      x = xstart + xduration / 2,
+      width = xduration,
+      y = ystart + yduration / 2,
+      height = yduration,
+      fill = d
+    )
+  ) +
+  geom_tile() +
+  coord_fixed() +
+  scale_fill_viridis_c(guide = "none") +
+  theme_classic() +
+  labs(x = "", y = "", title="Portrait")
+```
+
+---
+
+You can clearly see the fade-out in this self similarity matrix.
+
+
 Introduction
 ==============================
 
@@ -44,7 +186,7 @@ Visualisation {.storyboard}
 =============================================
 
 
-### How did these features change over the years? Visualisation per feature.
+### Tempo boxplot
 
 ```{r}
 CM_themes <- get_playlist_audio_features("","6ubQSyY5AOAZOTLaBUFHWD")
@@ -78,10 +220,11 @@ songs %>%
 
 ---
 
-Boxplot 1: The median of the different catogories is somewhat the same. The 50% around the median is differs more in category C, my songs. Catogory B has the lowest median, but an outlier with the highest tempo of all categories (The Portrait - James Horner).
+###### Boxplot 1: 
+The median of the different categories is somewhat the same. The 50% around the median is differs more in category C, my songs. Category B has the lowest median, but an outlier with the highest tempo of all categories (The Portrait - James Horner).
 
 
-### eery plot
+### Energy boxplot
 
 ```{r}
 songs %>%
@@ -95,11 +238,12 @@ songs %>%
 
 ---
 
-Boxplot 2: The median of the different catogories is somewhat the same for theme songs and more soundtracks, but way higher for my songs. The median of category A is higher than B, this is maybe because theme songs are the main song of the movie. Category B also includes songs that are used as more background music in movies. The outlier "The Portrait" from boxplot 1 is this time one of the lowest few. 
+###### Boxplot 2: 
+The median of the different catogories is somewhat the same for theme songs and more soundtracks, but way higher for my songs. The median of category A is higher than B, this is maybe because theme songs are the main song of the movie. Category B also includes songs that are used as more background music in movies. The outlier "The Portrait" from boxplot 1 is this time one of the lowest few. 
 
 
 
-### Tempo year
+### How did tempo change over the years?
 
 
 
@@ -130,11 +274,12 @@ ggplot(by_year, aes(x=year, y=tempo))+
 
 ---
 
-Graph 1: The median of tempo is plotted over the years. In boxplot 1, category A, we saw that the 50% around the median was small. In this graph, we can see that the 50% is so small because the tempo did not really change over the years. 
+###### Graph 1:
+The median of tempo is plotted over the years. In boxplot 1, category A, we saw that the 50% around the median was small. In this graph, we can see that the 50% is so small because the tempo did not really change over the years. 
 
 
 
-### enrgy year
+### How did energy change over the years?
 
 
 ```{r }
@@ -149,11 +294,12 @@ ggplot(by_year, aes(x=year, y=energy))+
 
 ---
 
-Graph 2: The median is plotted over the years. In boxplot 2, category A, we saw that the 50% around the median was a lot bigger than boxplot 1. In this graph, we can see that the 50% is so big because the tempo did really change over the years. In the early stages, energy was at its highest point, but decreased rapidly. but around the 2000, energy has a turning point, and started to increase again.
+###### Graph 2:
+The median is plotted over the years. In boxplot 2, category A, we saw that the 50% around the median was a lot bigger than boxplot 1. In this graph, we can see that the 50% is so big because the tempo did really change over the years. In the early stages, energy was at its highest point, but decreased rapidly. but around the 2000, energy has a turning point, and started to increase again.
 
 
 
-### How popular were these songs anyway? Visualisation Tempo and Energy together.
+### How popular were these songs? Tempo and Energy together.
 
 ```{r}
 vs <- ggplot(songs, aes(energy, tempo, colour = category, size = track.popularity)) + 
@@ -177,10 +323,10 @@ Conclusion
 ==========================
 
 
-Column 3
+Column 1
 ----------------------------------------------
 
-### Chromagran Alice in Wonderland themesong
+### Chromagran Alice in Wonderland theme song
 ```{r}
 alice_theme <-
   get_tidy_audio_analysis("5yJ4g5wiv77VzuhidvAnJ6") %>%
@@ -208,7 +354,9 @@ alice_theme %>%
 COlumn 2 {data-width=300}
 -----------------------------
 
-### What movie should I watch?
+### Further investigation tempo
+#### What movie should I watch?
+
 
 ```{r}
 my_songs_mean <- CM_faves %>%
@@ -218,7 +366,7 @@ my_songs_mean <- CM_faves %>%
 
 ```
 
-As was shown in the visualisations, the tempo of the different playlists didn't really differ from eachother. To know what soundtrack would fit the best in my favorite songs playlist, the average tempo of my favorite songs were calculated. \
+The boxplots of tempo showed that "The Portrait" was an outlier in the Theme Songs playlist. I would also like to investigate the similarity between playlists. As was shown in the visualisations, the (median) tempo of the different playlists didn't really differ from each other. To know what soundtrack would fit the best in my favorite songs playlist, the average tempo of my favorite songs were calculated. \
 The mean tempo of my favorite songs is: `r my_songs_mean`. \
 One of the songs in the theme song playlist should correspond the most with this mean tempo. \
 The corresponding track by this song is:
