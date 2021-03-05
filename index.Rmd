@@ -165,6 +165,28 @@ western <-
         method = "mean", norm = "manhattan"
       )
   )
+
+so <-
+  get_tidy_audio_analysis("6IA8E2Q5ttcpbuahIejO74") %>%
+  select(segments) %>%
+  unnest(segments) %>%
+  select(start, duration, pitches)
+
+so_chroma <- so %>%
+  mutate(pitches = map(pitches, compmus_normalise, "euclidean")) %>%
+  compmus_gather_chroma() %>% 
+  ggplot(
+    aes(
+      x = start + duration / 2,
+      width = duration,
+      y = pitch_class,
+      fill = value
+    )
+  ) +
+  geom_tile(show.legend = FALSE) +
+  labs(x = "Time (s)", y = NULL, fill = "Magnitude") +
+  theme_classic() +
+  scale_fill_viridis_c()
 ```
 ```{r}
 
@@ -260,8 +282,8 @@ western_key <- western %>%
 
 
 ### **Chordagram** and **Keygram** comparison of  2001: A space Odyssey 
-```{r, echo=FALSE, fig.width=13, fig.height=5}
-grid.arrange(space_chords, space_keys, nrow = 1, top="2001: A Space Odyssey")
+```{r, echo=FALSE, fig.width=16, fig.height=5}
+grid.arrange(space_chords, space_keys, so_chroma, nrow = 1, top="2001: A Space Odyssey")
 ```
 
 --- 
@@ -269,7 +291,9 @@ grid.arrange(space_chords, space_keys, nrow = 1, top="2001: A Space Odyssey")
 On the left the we see the chordogram and keygram of the track [Also sprach Zarathustra (sonnenaufgang) - Richard Strauss](https://open.spotify.com/album/6QeCspxUcE9xum4txWInJ0?highlight=spotify:track:6IA8E2Q5ttcpbuahIejO74) is shown.
 
 Also sprach Zarathustra is a 9 piece symphony composed by Richard Strauss.The first part was used in the movie _2001: A space Odyssey_. In this symphony, the C-chord stands for nature and the B-chord for humanity. 
-If we look at the chordogram, you don't really see those chords. The Chordogram shows an outro in **D major**. The keygram shows that the outro is in **D minor** key.
+If we look at the chordogram, you don't really see those chords. The Chordogram shows an outro in **D major**. The keygram shows that the outro is in **D minor** key. 
+
+I was interested in the chromagram, so that is shown too. Here you can see **C** present. A lot of nature vibes in the sunrise according to the chromagram. 
 
 
 
@@ -291,6 +315,7 @@ The keygram shows that this track starts in **D flat major** and changes to **D 
 
 ### **Chordogram** and **Keygram** comparison of The Good, The Bad and The Ugly. 
 ```{r, echo=FALSE, fig.width=13, fig.height=5}
+
 grid.arrange(western_chords, western_key, nrow = 1, top="The Good, The Bad and The Ugly")
 ```
 
@@ -301,6 +326,8 @@ On the left the we see the chordogram and keygram of the track [The Good, The Ba
 This song is the main theme from one of the most popular western movies. The main theme contains two types of flutes and human voices, that together should resemble the howling of a coyote. 
 
 The chords most apparent in the chordogram are **E flat 7** and **F7**. After one minute **D major** in the chordogram, and also in the keygram. 
+
+
 
 
 Introduction
@@ -475,6 +502,9 @@ We now have an overall view of the playlists. The features **Tempo** and **Energ
 
 The boxplots of Tempo showed that _The Portrait - James Horner_ was an **outlier** in the More Soundtracks playlist.It wasn't only an outlier in that playlist, it deviated from all three playlists. A boxplot also shows a median, a track can be seen as the midpoint of the dataset. But to find a song that blends in, I will use another method that I like more in the column on the right. 
 
+**The Portrait** is a song from the More Soundtracks playlist, so isn't a theme song. This song plays is the movie **Titanic**. In further investigations I will use this track as an outlier of my corpus. 
+
+
 COlumn 2 
 -----------------------------
 
@@ -507,7 +537,7 @@ kable(endsong)
 
 ```
 
-I will use the track _Alice's Theme - Danny Elfman_.
+The track **Alice's Theme** is from the composer Danny Elfman, and (as you can see in the title) plays in the movie **Alice in Wonderland**. 
 
 <img src="Cheshire_head.png">
 
@@ -716,3 +746,9 @@ You can see a chessboard pattern.
 
 **The Portrait**
 The yellow lines in the SSM show that the end is very different from the rest of the song. This is because this song has a fade out at the end, were the last seconds are completely silent. A long silence isn't in other parts of the song of course, so a yellow line appeares. 
+
+
+
+
+
+
