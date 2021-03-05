@@ -18,10 +18,12 @@ library(flexdashboard)
 library(shiny)
 library(plotly)
 library(knitr)
+library(grid)
+library(gridExtra)
 ```
 
 
-Homework 
+Homework{.storyboard}
 ==============================
 
 ```{r}
@@ -112,8 +114,47 @@ key_templates <-
   )
 ```
 ```{r}
-twenty_five <-
-  get_tidy_audio_analysis("0yIM3MDx8UTwueyoZJobsb") %>%
+monsters <-
+  get_tidy_audio_analysis("5e0O7MjhNHq9G67qDFM8nR") %>%
+  compmus_align(sections, segments) %>%
+  select(sections) %>%
+  unnest(sections) %>%
+  mutate(
+    pitches =
+      map(segments,
+        compmus_summarise, pitches,
+        method = "mean", norm = "manhattan"
+      )
+  )
+
+space <-
+  get_tidy_audio_analysis("6IA8E2Q5ttcpbuahIejO74") %>%
+  compmus_align(sections, segments) %>%
+  select(sections) %>%
+  unnest(sections) %>%
+  mutate(
+    pitches =
+      map(segments,
+        compmus_summarise, pitches,
+        method = "mean", norm = "manhattan"
+      )
+  )
+
+harry <-
+  get_tidy_audio_analysis("1n8NKQRg8LVHy7oUhUgbFF") %>%
+  compmus_align(sections, segments) %>%
+  select(sections) %>%
+  unnest(sections) %>%
+  mutate(
+    pitches =
+      map(segments,
+        compmus_summarise, pitches,
+        method = "mean", norm = "manhattan"
+      )
+  )
+
+western <-
+  get_tidy_audio_analysis("1JSIWsJfxOji0FrxFcxdCK") %>%
   compmus_align(sections, segments) %>%
   select(sections) %>%
   unnest(sections) %>%
@@ -126,7 +167,39 @@ twenty_five <-
   )
 ```
 ```{r}
-twenty_five %>% 
+
+space_chords <- space %>% 
+  compmus_match_pitch_template(
+    chord_templates,         # Change to chord_templates if descired
+    method = "manhattan",  # Try different distance metrics cosine
+    norm = "manhattan"     # Try different norms eunclidean
+  ) %>%
+  ggplot(
+    aes(x = start + duration / 2, width = duration, y = name, fill = d)
+  ) +
+  geom_tile() +
+  scale_fill_viridis_c(guide = "none") +
+  theme_minimal() +
+  labs(x = "Time (s)", y = "Chords")
+
+space_keys <- space %>% 
+  compmus_match_pitch_template(
+    key_templates,         # Change to chord_templates if descired
+    method = "manhattan",  # Try different distance metrics
+    norm = "manhattan"     # Try different norms
+  ) %>%
+  ggplot(
+    aes(x = start + duration / 2, width = duration, y = name, fill = d)
+  ) +
+  geom_tile() +
+  scale_fill_viridis_c(guide = "none") +
+  theme_minimal() +
+  labs(x = "Time (s)", y = "Keys")
+
+
+
+
+harry_chords <- harry %>% 
   compmus_match_pitch_template(
     chord_templates,         # Change to chord_templates if descired
     method = "manhattan",  # Try different distance metrics
@@ -138,14 +211,96 @@ twenty_five %>%
   geom_tile() +
   scale_fill_viridis_c(guide = "none") +
   theme_minimal() +
-  labs(x = "Time (s)", y = "Chords", title="The Portrait")
+  labs(x = "Time (s)", y = "Chords")
+
+harry_keys <- harry %>% 
+  compmus_match_pitch_template(
+    key_templates,         # Change to chord_templates if descired
+    method = "manhattan",  # Try different distance metrics
+    norm = "manhattan"     # Try different norms
+  ) %>%
+  ggplot(
+    aes(x = start + duration / 2, width = duration, y = name, fill = d)
+  ) +
+  geom_tile() +
+  scale_fill_viridis_c(guide = "none") +
+  theme_minimal() +
+  labs(x = "Time (s)", y = "Keys")
+
+
+
+western_chords <- western %>% 
+  compmus_match_pitch_template(
+    chord_templates,         # Change to chord_templates if descired
+    method = "manhattan",  # Try different distance metrics
+    norm = "manhattan"     # Try different norms
+  ) %>%
+  ggplot(
+    aes(x = start + duration / 2, width = duration, y = name, fill = d)
+  ) +
+  geom_tile() +
+  scale_fill_viridis_c(guide = "none") +
+  theme_minimal() +
+  labs(x = "Time (s)", y = "Chords")
+
+western_key <- western %>% 
+  compmus_match_pitch_template(
+    key_templates,         # Change to chord_templates if descired
+    method = "manhattan",  # Try different distance metrics
+    norm = "manhattan"     # Try different norms
+  ) %>%
+  ggplot(
+    aes(x = start + duration / 2, width = duration, y = name, fill = d)
+  ) +
+  geom_tile() +
+  scale_fill_viridis_c(guide = "none") +
+  theme_minimal() +
+  labs(x = "Time (s)", y = "Keys")
 ```
 
 
+### **Chordagram** and **Keygram** comparison of  2001: A space Odyssey 
+```{r, echo=FALSE, fig.width=13, fig.height=5}
+grid.arrange(space_chords, space_keys, nrow = 1, top="2001: A Space Odyssey")
+```
+
+--- 
+
+On the left the we see the chordogram and keygram of the track [Also sprach Zarathustra (sonnenaufgang) - Richard Strauss](https://open.spotify.com/album/6QeCspxUcE9xum4txWInJ0?highlight=spotify:track:6IA8E2Q5ttcpbuahIejO74) is shown.
+
+Also sprach Zarathustra is a 9 piece symphony composed by Richard Strauss.The first part was used in the movie _2001: A space Odyssey_. In this symphony, the C-chord stands for nature and the B-chord for humanity. 
+If we look at the chordogram, you don't really see those chords. The Chordogram shows an outro in **D major**. The keygram shows that the outro is in **D minor** key.
 
 
 
 
+### **Chordogram** and **Keygram** comparison of Harry Potter theme song
+```{r, echo=FALSE, fig.width=13, fig.height=5}
+grid.arrange(harry_chords, harry_keys, nrow = 1, top="Harry Potter")
+```
+
+---
+
+On the left the we see the chordogram and keygram of the track [Hedwig's Theme - John Williams](https://open.spotify.com/album/6zeHM5CV0CjcS0K8ouWE4N?highlight=spotify:track:1n8NKQRg8LVHy7oUhUgbFF) is shown.
+
+This track is for me the most nostalgic and iconic theme song there is. This theme is the leitmotif that occurs in all of the eight _Harry Potter_ films and the spin-off _Fantastic Beasts_, although not usually in its unaltered state.
+
+The keygram shows that this track starts in **D flat major** and changes to **D major** after two minutes. The chordogram also shows an intro in **D flat major**, but after two minutes the chords **C minor**, **F major** and **D7** show up. 
+
+
+
+### **Chordogram** and **Keygram** comparison of The Good, The Bad and The Ugly. 
+```{r, echo=FALSE, fig.width=13, fig.height=5}
+grid.arrange(western_chords, western_key, nrow = 1, top="The Good, The Bad and The Ugly")
+```
+
+---
+
+On the left the we see the chordogram and keygram of the track [The Good, The Bad and The Ugly - Ennio Morricone](https://open.spotify.com/album/1oLT2HO5MVNS8U4kEuBvdJ) is shown.
+
+This song is the main theme from one of the most popular western movies. The main theme contains two types of flutes and human voices, that together should resemble the howling of a coyote. 
+
+The chords most apparent in the chordogram are **E flat 7** and **F7**. After one minute **D major** in the chordogram, and also in the keygram. 
 
 
 Introduction
@@ -522,10 +677,6 @@ Titanic_ssm <- Titanic %>%
 ### Chromagrams 
 
 ```{r}
-library(grid)
-library(gridExtra)
-
-
 grid.arrange(Alice_chroma, Titanic_chroma, nrow = 2)
 
 ```
