@@ -494,7 +494,7 @@ Conclusion
 Column 1 
 ----------------------------------------------
 
-### Investigating tracks
+### Investigating tracks (tempo)
 #### Which song did not fit in?
 
 We now have an overall view of the playlists. The features **Tempo** and **Energy** showed different relations between the playlists. In the feature Tempo, the medians of all playlists were close together. Energy on the other hand, showed that the median of My Songs was higher than that of the soundtrack playlists. To understand the corpus better, we are going to dive in the soundtrack playlists, Theme songs and More Soundtracks, and hopefully discover some interesting findings. Songs that do not fit in the bunch are interesting to investigate. I would also like to investigate the similarity between playlists, so a track that blends in is also not a bad choice. 
@@ -704,7 +704,7 @@ Titanic_ssm <- Titanic %>%
   labs(x = "", y = "", title="The Portrait")
 ```
 
-### Chromagrams 
+### Alice in Wonderland vs. Titanic: **Chromagrams** 
 
 ```{r, fig.width=13, fig.height=5}
 grid.arrange(Alice_chroma, Titanic_chroma, nrow = 1)
@@ -722,7 +722,7 @@ The yellow places are the pitches that occur the most in the tracks. Alice's The
 The pitches used in this track are more clear. In the first three minutes of the song, seven different pitches are used ("C", "D", "E", "F", "G", "A" and "A#"). After three minutes, "D", "E" and "A" stay present, but the other four pitches go one up. 
 
 
-### Cepstrograms
+### Alice in Wonderland vs. Titanic: **Cepstrograms**
 ```{r, fig.width=13, fig.height=5}
 grid.arrange(Alice_cep, Titanic_cep, nrow = 1)
 ```
@@ -732,7 +732,7 @@ grid.arrange(Alice_cep, Titanic_cep, nrow = 1)
 On the left are the cepstrograms from Alice's Theme and The Portrait shown. 
 
 
-### Self-Similarity matrix
+### Alice in Wonderland vs. Titanic: **Self-Similarity matrix**
 ```{r, fig.width=13, fig.height=5}
 grid.arrange(Alice_ssm, Titanic_ssm, nrow = 1)
 ```
