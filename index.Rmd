@@ -20,6 +20,7 @@ library(plotly)
 library(knitr)
 library(grid)
 library(gridExtra)
+library(png)
 ```
 
 
@@ -42,15 +43,23 @@ pf_novelty <- noveltypf %>%
   mutate(delta_loudness = loudness_max - lag(loudness_max)) %>%
   ggplot(aes(x = loudness_max_time, y = pmax(0, delta_loudness))) +
   geom_line() +
-  xlim(50, 70) +
+  xlim(40, 80) +
   theme_minimal() +
-  labs(x = "Time (s)", y = "Novelty")
+  labs(x = "Time (s)", y = "Novelty", title="For a Few Dollars More")
 ```
 
 
 ### Alice in Wonderland: **Tempogram**.
 
-<img src="aw_temp2.PNG">
+
+```{r, echo=FALSE, fig.width=10, fig.height=7}
+
+img1 <- readPNG('aw_temp2.PNG')
+grob1 <- rasterGrob(img1)
+
+grid.arrange(grob1, nrow = 1, top="Alice's Theme")
+```
+
 
 ---
 
@@ -61,9 +70,17 @@ You can see three yellow lines at 100, 250 and 350 BPM.
 
 ### The Wild West: **Tempogram**.
 
-<img src="ww_temp2.PNG">
+```{r, echo=FALSE, fig.width=10, fig.height=7}
+
+img0 <- readPNG('ww_temp2.PNG')
+grob0 <- rasterGrob(img0)
+
+grid.arrange(grob0, pf_novelty, nrow = 2)
+```
 
 ---
+
+**Tempograms**
 
 On the left the we see the tempograms of the tracks [The Good, The Bad and The Ugly - Ennio Morricone](https://open.spotify.com/album/1oLT2HO5MVNS8U4kEuBvdJ) and [For a Few Dollars More - Ennio Morricone](https://open.spotify.com/album/0Jb8GjDfrHi73bIr9uRB3V?highlight=spotify:track:0docNVbngDDOXzXr7g80Pa) are shown.
 
@@ -71,14 +88,9 @@ Both soundtracks are made by Ennio Morricone and are from the Dollars Trilogy, a
 
 The first graph has some yellow lines. You can see a line at 200 BPM that increases slightly and you also see what activity just above 400. The second soundtrack starts after about 1 minute, and you can see it has around the same BPM as the first one.
 
-### The Wild West: **Novelty**.
-```{r}
-pf_novelty
-```
+**Novelty**
 
----
-
-On the left the we see the novelty of the track [For a Few Dollars More - Ennio Morricone](https://open.spotify.com/album/0Jb8GjDfrHi73bIr9uRB3V?highlight=spotify:track:0docNVbngDDOXzXr7g80Pa) around the beginning of the song.The song starts at 1:06. 
+On the left the we also see the novelty of the track [For a Few Dollars More - Ennio Morricone](https://open.spotify.com/album/0Jb8GjDfrHi73bIr9uRB3V?highlight=spotify:track:0docNVbngDDOXzXr7g80Pa) around the beginning of the song.The song starts at 1:06. You can see that the yellow vertical line in the tempogram represents the silence in the novelty graph.
 
 Introduction
 ==============================
