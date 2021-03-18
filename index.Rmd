@@ -21,76 +21,186 @@ library(knitr)
 library(grid)
 library(gridExtra)
 library(png)
+library(tidymodels)
+library(ggdendro)
+library(heatmaply)
 ```
+```{r}
+get_conf_mat <- function(fit) {
+  outcome <- .get_tune_outcome_names(fit)
+  fit %>% 
+    collect_predictions() %>% 
+    conf_mat(truth = outcome, estimate = .pred_class)
+}  
 
+get_pr <- function(fit) {
+  fit %>% 
+    conf_mat_resampled() %>% 
+    group_by(Prediction) %>% mutate(precision = Freq / sum(Freq)) %>% 
+    group_by(Truth) %>% mutate(recall = Freq / sum(Freq)) %>% 
+    ungroup() %>% filter(Prediction == Truth) %>% 
+    select(class = Prediction, precision, recall)
+}  
+```
+```{r}
+CM_themes <- get_playlist_audio_features("","6ubQSyY5AOAZOTLaBUFHWD")
+CM_soundtrack <- get_playlist_audio_features("","5Lo1O7pS5PWc9z6UuplHyX")
+CM_faves <- get_playlist_audio_features("","0QzlUG13KFnSFOqgxeEli2")
+```
+```{r}
+CM_soundtracks <-
+  bind_rows(
+    CM_themes %>% mutate(category = "Theme songs"),
+    CM_soundtrack %>% mutate(category = "more soundtracks")
+  )
+```
 
 Homework{.storyboard}
 ==============================
 
 ```{r}
-varpf = get_tidy_audio_analysis("1aXxjgFceA1j68soTeGsu8")
+indie <-
+  bind_rows(
+    #CM_themes %>% mutate(playlist = "Themes"),
+    CM_soundtracks %>% mutate(playlist = "Films"),
+    CM_faves %>% mutate(playlist = "Faves")
+  )
+
+indie_features <-
+  indie %>%  # For your portfolio, change this to the name of your corpus.
+  add_audio_analysis() %>% 
+  mutate(
+    playlist = factor(playlist),
+    segments = map2(segments, key, compmus_c_transpose),
+    pitches =
+      map(
+        segments,
+        compmus_summarise, pitches,
+        method = "mean", norm = "manhattan"
+      ),
+    timbre =
+      map(
+        segments,
+        compmus_summarise, timbre,
+        method = "mean",
+      )
+  ) %>%
+  mutate(pitches = map(pitches, compmus_normalise, "clr")) %>%
+  mutate_at(vars(pitches, timbre), map, bind_rows) %>%
+  unnest(cols = c(pitches, timbre))
 ```
+```{r}
+indie_recipe <-
+  recipe(
+    playlist ~
+      danceability +
+      energy +
+      loudness +
+      speechiness +
+      acousticness +
+      instrumentalness +
+      liveness +
+      valence +
+      tempo +
+      duration +
+      C + `C#|Db` + D + `D#|Eb` +
+      E + `F` + `F#|Gb` + G +
+      `G#|Ab` + A + `A#|Bb` + B +
+      c01 + c02 + c03 + c04 + c05 + c06 +
+      c07 + c08 + c09 + c10 + c11 + c12,
+    data = indie_features,          # Use the same name as the previous block.
+  ) %>%
+  step_center(all_predictors()) %>%
+  step_scale(all_predictors())      # Converts to z-scores.
+  # step_range(all_predictors())    # Sets range to [0, 1].
+```
+```{r}
+indie_cv <- indie_features %>% vfold_cv(5)
+```
+```{r}
+knn_model <-
+  nearest_neighbor(neighbors = 1) %>%
+  set_mode("classification") %>% 
+  set_engine("kknn")
+indie_knn <- 
+  workflow() %>% 
+  add_recipe(indie_recipe) %>% 
+  add_model(knn_model) %>% 
+  fit_resamples(
+    indie_cv, 
+    control = control_resamples(save_pred = TRUE)
+  )
+```
+
+### Playlists mosaic k-NN
 
 ```{r}
-noveltypf <-
-  varpf %>%
-  select(segments) %>%
-  unnest(segments)
+indie_knn %>% get_conf_mat() %>% autoplot(type = "mosaic")
+```
 
-pf_novelty <- noveltypf %>%
-  mutate(loudness_max_time = start + loudness_max_time) %>%
-  arrange(loudness_max_time) %>%
-  mutate(delta_loudness = loudness_max - lag(loudness_max)) %>%
-  ggplot(aes(x = loudness_max_time, y = pmax(0, delta_loudness))) +
-  geom_line() +
-  xlim(40, 80) +
+---
+
+```{r}
+indie_knn %>% get_conf_mat()
+```
+The k-nn shows a clear difference between film music and my favorite songs.The left upper block is bigger than the left bottom block and the right bottom block us (way) bigger than the right upper block. This means that the prediction are pretty accurate. 
+
+### Forest
+
+```{r}
+forest_model <-
+  rand_forest() %>%
+  set_mode("classification") %>% 
+  set_engine("ranger", importance = "impurity")
+indie_forest <- 
+  workflow() %>% 
+  add_recipe(indie_recipe) %>% 
+  add_model(forest_model) %>% 
+  fit_resamples(
+    indie_cv, 
+    control = control_resamples(save_pred = TRUE)
+  )
+```
+
+
+```{r}
+workflow() %>% 
+  add_recipe(indie_recipe) %>% 
+  add_model(forest_model) %>% 
+  fit(indie_features) %>% 
+  pluck("fit", "fit", "fit") %>%
+  ranger::importance() %>% 
+  enframe() %>% 
+  mutate(name = fct_reorder(name, value)) %>% 
+  ggplot(aes(name, value)) + 
+  geom_col() + 
+  coord_flip() +
   theme_minimal() +
-  labs(x = "Time (s)", y = "Novelty", title="For a Few Dollars More")
-```
-
-
-### Alice in Wonderland: **Tempogram**.
-
-
-```{r, echo=FALSE, fig.width=10, fig.height=7}
-
-img1 <- readPNG('aw_temp2.PNG')
-grob1 <- rasterGrob(img1)
-
-grid.arrange(grob1, nrow = 1, top="Alice's Theme")
-```
-
-
----
-
-On the left the we see the tempogram of the track [Alice's Theme - Danny Elfman](https://open.spotify.com/album/4HcpykTFR8ZfyyrOX9jNJo?highlight=spotify:track:11liAe3FvMGspJ9x3a1xw4) is shown.
-
-You can see three yellow lines at 100, 250 and 350 BPM.
-
-
-### The Wild West: **Tempogram**.
-
-```{r, echo=FALSE, fig.width=10, fig.height=7}
-
-img0 <- readPNG('ww_temp2.PNG')
-grob0 <- rasterGrob(img0)
-
-grid.arrange(grob0, pf_novelty, nrow = 2)
+  labs(x = NULL, y = "Importance")
 ```
 
 ---
 
-**Tempograms**
+```{r}
+kable(indie_forest %>% get_pr())
+```
 
-On the left the we see the tempograms of the tracks [The Good, The Bad and The Ugly - Ennio Morricone](https://open.spotify.com/album/1oLT2HO5MVNS8U4kEuBvdJ) and [For a Few Dollars More - Ennio Morricone](https://open.spotify.com/album/0Jb8GjDfrHi73bIr9uRB3V?highlight=spotify:track:0docNVbngDDOXzXr7g80Pa) are shown.
 
-Both soundtracks are made by Ennio Morricone and are from the Dollars Trilogy, an Italian film series consisting of three Spaghetti Western films. 
+### Visualisation 
 
-The first graph has some yellow lines. You can see a line at 200 BPM that increases slightly and you also see what activity just above 400. The second soundtrack starts after about 1 minute, and you can see it has around the same BPM as the first one.
+```{r}
+indie_features %>%
+  ggplot(aes(x = c01, y = loudness, colour = playlist, size = energy)) +
+  geom_point(alpha = 0.9) +
+  scale_color_viridis_d() +
+  ylim(-26,0)+
+  xlim(25, 58)+
+  labs(x = "Timbre Component 1",y = "loudness", size = "Energy",colour = "Playlist") +
+  geom_text_repel(aes(label = track.name), size = 3)
+```
 
-**Novelty**
 
-On the left the we also see the novelty of the track [For a Few Dollars More - Ennio Morricone](https://open.spotify.com/album/0Jb8GjDfrHi73bIr9uRB3V?highlight=spotify:track:0docNVbngDDOXzXr7g80Pa) around the beginning of the song.The song starts at 1:06. You can see that the yellow vertical line in the tempogram represents the silence in the novelty graph.
+
 
 Introduction
 ==============================
@@ -118,11 +228,6 @@ Visualisation {.storyboard}
 
 ### The feature **Tempo**.
 
-```{r}
-CM_themes <- get_playlist_audio_features("","6ubQSyY5AOAZOTLaBUFHWD")
-CM_soundtrack <- get_playlist_audio_features("","5Lo1O7pS5PWc9z6UuplHyX")
-CM_faves <- get_playlist_audio_features("","0QzlUG13KFnSFOqgxeEli2")
-```
 ```{r}
 songs <-
   bind_rows(
@@ -720,6 +825,26 @@ western_key <- western %>%
   theme_minimal() +
   labs(x = "Time (s)", y = "Keys")
 ```
+```{r}
+varpf = get_tidy_audio_analysis("1aXxjgFceA1j68soTeGsu8")
+```
+```{r}
+noveltypf <-
+  varpf %>%
+  select(segments) %>%
+  unnest(segments)
+
+pf_novelty <- noveltypf %>%
+  mutate(loudness_max_time = start + loudness_max_time) %>%
+  arrange(loudness_max_time) %>%
+  mutate(delta_loudness = loudness_max - lag(loudness_max)) %>%
+  ggplot(aes(x = loudness_max_time, y = pmax(0, delta_loudness))) +
+  geom_line() +
+  xlim(40, 80) +
+  theme_minimal() +
+  labs(x = "Time (s)", y = "Novelty", title="For a Few Dollars More")
+```
+
 
 
 
@@ -814,6 +939,48 @@ This song is the main theme from one of the most popular western movies. The mai
 The chords most apparent in the chordogram are **E flat 7** and **F7**. After one minute **D major** in the chordogram, and also in the keygram. 
 
 
+### Alice in Wonderland: **Tempogram**.
+
+
+```{r, echo=FALSE, fig.width=10, fig.height=7}
+
+img1 <- readPNG('aw_temp2.PNG')
+grob1 <- rasterGrob(img1)
+
+grid.arrange(grob1, nrow = 1, top="Alice's Theme")
+```
+
+
+---
+
+On the left the we see the tempogram of the track [Alice's Theme - Danny Elfman](https://open.spotify.com/album/4HcpykTFR8ZfyyrOX9jNJo?highlight=spotify:track:11liAe3FvMGspJ9x3a1xw4) is shown.
+
+You can see three yellow lines at 100, 250 and 350 BPM.
+
+
+### The Wild West: **Tempogram**.
+
+```{r, echo=FALSE, fig.width=10, fig.height=7}
+
+img0 <- readPNG('ww_temp2.PNG')
+grob0 <- rasterGrob(img0)
+
+grid.arrange(grob0, pf_novelty, nrow = 2)
+```
+
+---
+
+**Tempograms**
+
+On the left the we see the tempograms of the tracks [The Good, The Bad and The Ugly - Ennio Morricone](https://open.spotify.com/album/1oLT2HO5MVNS8U4kEuBvdJ) and [For a Few Dollars More - Ennio Morricone](https://open.spotify.com/album/0Jb8GjDfrHi73bIr9uRB3V?highlight=spotify:track:0docNVbngDDOXzXr7g80Pa) are shown.
+
+Both soundtracks are made by Ennio Morricone and are from the Dollars Trilogy, an Italian film series consisting of three Spaghetti Western films. 
+
+The first graph has some yellow lines. You can see a line at 200 BPM that increases slightly and you also see what activity just above 400. The second soundtrack starts after about 1 minute, and you can see it has around the same BPM as the first one.
+
+**Novelty**
+
+On the left the we also see the novelty of the track [For a Few Dollars More - Ennio Morricone](https://open.spotify.com/album/0Jb8GjDfrHi73bIr9uRB3V?highlight=spotify:track:0docNVbngDDOXzXr7g80Pa) around the beginning of the song.The song starts at 1:06. You can see that the yellow vertical line in the tempogram represents the silence in the novelty graph.
 
 
 
