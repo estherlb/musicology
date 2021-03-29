@@ -89,8 +89,15 @@ blocks <- readPNG('MLblocks.PNG')
 grob0 <- rasterGrob(blocks)
 stripes <- readPNG('MLstripes.PNG')
 grob1 <- rasterGrob(stripes)
+recall <- readPNG('MLrecall.PNG')
+grob2 <- rasterGrob(recall)
 
-grid.arrange(grob0, grob1, nrow = 1)
+lay <- rbind(c(0,0,1,1),
+             c(0,0,1,1),
+             c(0,0,1,1),
+             c(3,2,2,3))
+
+grid.arrange(grob0, grob1, grob2, layout_matrix = lay, top = "Predictions with a model")
 ```
 
 
@@ -103,10 +110,7 @@ The mosaic of the k-nn shows a clear difference between film music and my favori
 
 <img src="MLblocktabel.PNG">
 
-To know how well the model did, presicion and recall can be calculated, and it show the model did pretty well.
-
-<img src="MLrecall.PNG">
-
+To know how well the model did, presicion and recall can be calculated. The recall, which is the true positives among all real positives, is pretty high. The precision, the true positives among all predicted positives, is also pretty high. This means that the model did very well.
 
 
 We can see in the graph that the feature loudness, instrumentalness and **energy** were the most significant features, together with c01 (timbre component 1). A feature that was not effective was **tempo**. 
@@ -116,7 +120,7 @@ The features **energy** and **tempo** will be used in further visualisations.
 ### Visualisation of the two most effective features
 
 
-<img src="MLclust.PNG">
+<img src="MLclust.PNG" title="Clustering with effective features">
 
 
 
@@ -249,6 +253,7 @@ ggplotly(vs)
 
 ###### Graph 3:
 If you click on A and B, only C will show. You'll see that a red cluster is formed in the right side of the plot. A and B together are more active on the left side.You don't see clusters forming in the up or down side. Tempo seems equally distributed for all the three playlists, unlike the other feature energy. We also saw this in the visualisation per feature. 
+
 
 
 
@@ -769,7 +774,18 @@ grid.arrange(Alice_cep, Titanic_cep, nrow = 1)
 
 ---
 
-On the left are the cepstrograms from Alice's Theme and The Portrait shown. 
+
+On the left we see the very different cepstrograms from Alice's Theme and The Portrait that are used to investigate *timbre* in a musical piece. Timbre, that is different from pitch as we saw in the chromagrams, looks at the sound colour of the note. Timbre can seperate different musical instruments that play in the same pitch for example.  
+
+The graphs show different timbre components over time. According to the spotify API documentation, the first timbre component represents the average loudness of the segment; second emphasizes brightness; third is more closely correlated to the flatness of a sound; fourth to sounds with a stronger attack; etc.  
+
+**Alice's Theme - Danny Elfman:** 
+A lot of the timbre components are used in this piece. The second timbre component looks the most present, but also the first, third and fifth are almost just as present.
+
+**The Portrait - James Horner:**
+Just like Alice's Theme, the second timbre component is most present. But the other timbre components are not present at all.
+
+That the cepstrograms look so different ca be explained. Alice's Theme has a lot more variation, it contains voices and different instruments. The Portrait on the other hand, is a piece with only piano. 
 
 
 ### Alice in Wonderland vs. Titanic: **Self-Similarity matrix**
@@ -782,10 +798,12 @@ grid.arrange(Alice_ssm, Titanic_ssm, nrow = 1)
 On the left are the self-similarity matrices from Alice's Theme and The Portrait shown. 
 
 **Alice's Theme**
-You can see a chessboard pattern.
+You can see a *chessboard pattern*, which means there is homogeneity in this soundtrack. **Homogeneity** means that passages or sections in the piece are persistent and contain similar features (tempo, instrumentation etc.) with some other musical property in the song. Next to homogeneity based approaches, you also have repetition based approaches, that shows the structure of a piece, and especially focuses on recurring patterns/sections in the song. This would show some diagonal lines in the graph, which we don't see in Alice's Theme. 
 
 **The Portrait**
-The yellow lines in the SSM show that the end is very different from the rest of the song. This is because this song has a fade out at the end, were the last seconds are completely silent. A long silence isn't in other parts of the song of course, so a yellow line appeares. 
+In this piece, we see some big blue blocks, the one darker blue than the other. The sections in the piece are very similar the one another. Only the *yellow lines* in the SSM shows that the end is very different from the rest of the song. This is because this song has a fade out at the end, were the last seconds are completely silent. A long silence isn't in other parts of the song of course, so a yellow line appears. 
+
+
 
 
 ### 2001: A space Odyssey: **Chordogram** and **Keygram** and **Chromagram**.
@@ -849,9 +867,10 @@ grid.arrange(grob1, nrow = 1, top="Alice's Theme")
 
 ---
 
-On the left the we see the tempogram of the track [Alice's Theme - Danny Elfman](https://open.spotify.com/album/4HcpykTFR8ZfyyrOX9jNJo?highlight=spotify:track:11liAe3FvMGspJ9x3a1xw4) is shown.
+On the left the we see the tempogram of the track [Alice's Theme - Danny Elfman](https://open.spotify.com/album/4HcpykTFR8ZfyyrOX9jNJo?highlight=spotify:track:11liAe3FvMGspJ9x3a1xw4) is shown. A tempogram indicates for each time instance the local relevance of a specific tempo for a given music recording.
 
-You can see three yellow lines at 100, 250 and 350 BPM.
+
+You can see three yellow lines at 100, 250 and 350 BPM. The lines are consistent horizontal lines, which means that the tempo doesn't really variate a lot. 
 
 
 ### The Wild West: **Tempogram**.
@@ -872,12 +891,37 @@ On the left the we see the tempograms of the tracks [The Good, The Bad and The U
 
 Both soundtracks are made by Ennio Morricone and are from the Dollars Trilogy, an Italian film series consisting of three Spaghetti Western films. 
 
-The first graph has some yellow lines. You can see a line at 200 BPM that increases slightly and you also see what activity just above 400. The second soundtrack starts after about 1 minute, and you can see it has around the same BPM as the first one.
+The first graph has some yellow lines. You can see a line at 200 BPM that increases slightly and you also see what activity just above 400. The second soundtrack starts after about 1 minute, and you can see it has around the same BPM as the first one. The tempo in these grams aren't as consistent as Alice's Theme. 
 
 **Novelty**
 
 On the left the we also see the novelty of the track [For a Few Dollars More - Ennio Morricone](https://open.spotify.com/album/0Jb8GjDfrHi73bIr9uRB3V?highlight=spotify:track:0docNVbngDDOXzXr7g80Pa) around the beginning of the song.The song starts at 1:06. You can see that the yellow vertical line in the tempogram represents the silence in the novelty graph.
 
 
+Conclusion
+====================================
+
+Column 1 
+----------------------------------------------
+
+### Investigating soundtracks and my songs
+
+#### The model over playlists
+
+We saw in the machine learning model some components in music could differentiate the different playlists very well. The features *loudness, instrumentalness* and *energy* were very effect classifying the songs. Other features, for example tempo, did a lesser job.
+
+When we looked further into these features, boxplots showed us the same thing as the model. The average tempo of the playlists wasn't different at all. But when we looked at energy, the boxplots showed a significant difference. 
+
+A song that is similar to all playlist was Alice's Theme, which tempo corresponded to the mean tempo of my favorite songs. A song that was very different from all other playlists was The Portrait, that was an outlier when looking at tempo. 
+
+
+Column 2
+----------------------------------------------
+
+### Investigating music in movies
+
+#### Different grams for soundtracks
+
+Part to of this portfolio zoomed in on different songs of the movie playlists. We saw that every song was unique in its own way. But tempo was again a feature were similarities could be seen. When looking at the Wild West soundtracks of Ennio Moricone, the tempo was approximately as each other, and the Alice's Theme, that was the song that had a average tempo.
 
 
