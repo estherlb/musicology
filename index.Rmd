@@ -74,7 +74,7 @@ Almost every movie has music in it. These soundtracks often play in the backgrou
 * **More soundtracks:** A playlist with more soundtracks, other than a themesong, movies have a lot of other music in it. _Tracks: 196_
 * **My songs:** An old playlist of mine where I stored my favorite songs over the last couple of years. _Tracks: 70_
 
-My goal is to examine different features, compare them to one another and search for a feature that isn't that different from my music. When I find that feature, I hope to find the themesong that corresponds the most to my favorite songs.
+My goal is to examine different features, compare them to one another and search for a feature that isn't that different from my music. When I find that feature, I hope to find the theme song that corresponds the most to my favorite songs.I would also like to look into the Theme songs and More soundtracks playlists together and investigate the songs in it.
 
 
 Explore {.storyboard}
@@ -104,16 +104,16 @@ grid.arrange(grob0, grob1, grob2, layout_matrix = lay, top = "Predictions with a
 ---
 
 
-To investigate which feature of the spotify API can classify the songs from my corpus, a k-NN model is trained. At the left we can see a mosiac of the trained model that shows how well it performed. Next to the mosiac a graph is shown with the different features that were the most effective for the classification.
+To investigate which feature of the spotify API can classify the songs from my corpus, a k-NN model is trained. At the left we can see a mosaic of the trained model that shows how well it performed. Next to the mosaic a graph is shown with the different features that were the most effective for the classification.
 
-The mosaic of the k-nn shows a clear difference between film music and my favorite songs.The left upper block is bigger than the left bottom block and the right bottom block us (way) bigger than the right upper block. This means that the prediction are pretty accurate. To have the precise numbers of the mosiac, the table below is shown:
+The mosaic of the k-NN shows a clear difference between film music and my favorite songs.The left upper block is bigger than the left bottom block and the right bottom block us (way) bigger than the right upper block. This means that the prediction are pretty accurate. The precise numbers of the mosaic are shown in the table below:
 
 <img src="MLblocktabel.PNG">
 
-To know how well the model did, presicion and recall can be calculated. The recall, which is the true positives among all real positives, is pretty high. The precision, the true positives among all predicted positives, is also pretty high. This means that the model did very well.
+To know how well the model did, precision and recall can be calculated. The recall, which is the true positives among all real positives, is pretty high. The precision, the true positives among all predicted positives, is also pretty high. This means that the model did very well.
 
 
-We can see in the graph that the feature loudness, instrumentalness and **energy** were the most significant features, together with c01 (timbre component 1). A feature that was not effective was **tempo**. 
+We can see in the graph that the feature loudness, instrumentalness and **energy** were the most significant features, together with c01 (timbre component 1). A feature that was not really effective was **tempo**. 
 
 The features **energy** and **tempo** will be used in further visualisations. 
 
@@ -121,6 +121,10 @@ The features **energy** and **tempo** will be used in further visualisations.
 
 
 <img src="MLclust.PNG" title="Clustering with effective features">
+
+---
+
+This cluster representation shows loudness versus timbre component 1. Both clusters are directly proportional, which means that of loudness goes up, c01 also goes up. The playlist of my favorite song is clustered at the right top, while the soundtracks are more scattered over the diagonal. There is a soundtrack *"Misirlou"* is on top, this track also has a lot of energy. 
 
 
 
@@ -267,7 +271,7 @@ Column 1
 ### Investigating tracks (tempo)
 #### Which song did not fit in?
 
-We now have an overall view of the playlists. The features **Tempo** and **Energy** showed different relations between the playlists. In the feature Tempo, the medians of all playlists were close together. Energy on the other hand, showed that the median of My Songs was higher than that of the soundtrack playlists. To understand the corpus better, we are going to dive in the soundtrack playlists, Theme songs and More Soundtracks, and hopefully discover some interesting findings. Songs that do not fit in the bunch are interesting to investigate. I would also like to investigate the similarity between playlists, so a track that blends in is also not a bad choice. 
+We now have an overall view of the playlists. The features **Tempo** and **Energy** showed different relations between the playlists. In the feature **Tempo**, the medians of all playlists were close together. **Energy** on the other hand, showed that the median of My Songs was higher than that of the soundtrack playlists. To understand the corpus better, we are going to dive in the soundtrack playlists (Theme songs and More Soundtracks) and hopefully discover some interesting findings. Songs that do not fit in the bunch are interesting to investigate. I would also like to investigate the similarity between playlists, so I will also investigate a track that blends in. 
 \n \n
 
 The boxplots of Tempo showed that _The Portrait - James Horner_ was an **outlier** in the More Soundtracks playlist.It wasn't only an outlier in that playlist, it deviated from all three playlists. A boxplot also shows a median, a track can be seen as the midpoint of the dataset. But to find a song that blends in, I will use another method that I like more in the column on the right. 
@@ -836,6 +840,8 @@ This track is for me the most nostalgic and iconic theme song there is. This the
 
 The keygram shows that this track starts in **D flat major** and changes to **D major** after two minutes. The chordogram also shows an intro in **D flat major**, but after two minutes the chords **C minor**, **F major** and **D7** show up. 
 
+It could be interesting, in further investigation, to compare track with the variation in Fantastic Beasts. This portfolio will not show that, because that song wasn't in the corpus.
+
 
 
 ### The Good, The Bad and The Ugly: **Chordogram** and **Keygram**. 
@@ -852,6 +858,7 @@ This song is the main theme from one of the most popular western movies. The mai
 
 The chords most apparent in the chordogram are **E flat 7** and **F7**. After one minute **D major** in the chordogram, and also in the keygram. 
 
+It could be interesting, in further investigation, to compare track with the other songs from western movies. This portfolio will show that.
 
 ### Alice in Wonderland: **Tempogram**.
 
@@ -870,7 +877,7 @@ grid.arrange(grob1, nrow = 1, top="Alice's Theme")
 On the left the we see the tempogram of the track [Alice's Theme - Danny Elfman](https://open.spotify.com/album/4HcpykTFR8ZfyyrOX9jNJo?highlight=spotify:track:11liAe3FvMGspJ9x3a1xw4) is shown. A tempogram indicates for each time instance the local relevance of a specific tempo for a given music recording.
 
 
-You can see three yellow lines at 100, 250 and 350 BPM. The lines are consistent horizontal lines, which means that the tempo doesn't really variate a lot. 
+You can see three yellow lines at 100, 250 and 350 BPM. The real tempo is 100 BPM. The other two lines, 250 and 350 BPM, are really fast. The lines are consistent horizontal lines, which means that the tempo doesn't really variate a lot. 
 
 
 ### The Wild West: **Tempogram**.
@@ -922,6 +929,5 @@ Column 2
 
 #### Different grams for soundtracks
 
-Part to of this portfolio zoomed in on different songs of the movie playlists. We saw that every song was unique in its own way. But tempo was again a feature were similarities could be seen. When looking at the Wild West soundtracks of Ennio Moricone, the tempo was approximately as each other, and the Alice's Theme, that was the song that had a average tempo.
-
+Part to of this portfolio zoomed in on different songs of the movie playlists. We saw that every song was unique in its own way. But tempo was again a feature were similarities could be seen. When looking at the Wild West soundtracks of Ennio Moricone, the tempo was approximately the same in both tracks. 
 
