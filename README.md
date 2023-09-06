@@ -6,3 +6,4 @@ For this course, I want to work with spotify's "Movie Soundtrack Best of" playli
 This playlist has a lot of different movies, but most of them are more or less the same genre. I will maybe in the future add some other soundtracks to make the playlist somewhat more diverse. I see a lot of adventure/fantasy feel good movies, to make a representative dataset it is important to have other genres as well. Also, there are some movie saga's, the playlist contains a lot of Harry Potter songs for example.
 For this course, I would like to compare the music that I like to the movie soundtrack playlist, and see what movie compares best to my music and if my music taste is the same as my movie taste. I would also like to find out if the same movie genres have the same kind of music. 
 A line I wrote on my local computer
+https://estherlb.github.io/musicology/
